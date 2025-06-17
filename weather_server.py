@@ -2,9 +2,10 @@ from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP
 import sys
+import argparse
 
-# Initialize FastMCP server
-mcp = FastMCP("weather")
+# Initialize FastMCP server with port 8001
+mcp = FastMCP("weather", port=8001)
 
 # Constants
 NWS_API_BASE = "https://api.weather.gov"
@@ -94,7 +95,21 @@ Forecast: {period['detailedForecast']}
     return "\n---\n".join(forecasts)
 
 if __name__ == "__main__":
-    # Initialize and run the server
-    print("Starting weather MCP server...", file=sys.stderr)
-    print("Server is ready and listening for MCP protocol messages", file=sys.stderr)
-    mcp.run(transport='stdio')
+    import argparse
+    
+    # Start the server
+    print("🚀Starting weather server...", file=sys.stderr)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--server_type", type=str, default="sse", choices=["sse", "stdio"]
+    )
+
+    args = parser.parse_args()
+    
+    if args.server_type == "sse":
+        print("Weather server ready on http://127.0.0.1:8001/sse", file=sys.stderr)
+    else:
+        print("Weather server ready and listening for MCP protocol messages", file=sys.stderr)
+    
+    mcp.run(args.server_type)
